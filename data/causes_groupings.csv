@@ -1,0 +1,27 @@
+Cause_group_code,Cause_code_range,Cause_description
+A,"(A00-A99)	",Certain infectious and parasitic diseases
+B,"(B00-B99)	",Certain infectious and parasitic diseases
+C,"(C00-C97)	", Malignant Neoplasms
+D,(D00-D89),"In situ neoplasms,Diseases of the blood and blood-forming organs and certain disorders involving the immune mechanism"
+E,(E00-E90),"Endocrine, nutritional and metabolic diseases"
+F,(F00-F99),Mental and behavioural disorders
+G,(G00-G99) ,Diseases of the nervous system
+H,"(H00-H95)	",Diseases of the eye and adnexa and ear
+I,(I00-I99),Diseases of the circulatory system
+J,(J00-J99),Diseases of the respiratory system
+K,"(K00-K93)	",Diseases of the digestive system
+L,(L00-L99),Diseases of the skin and subcutaneous tissue
+M,"(M00-M99)	",Diseases of the musculoskeletal system and connective tissue
+N,(N00-N99),Diseases of the genitourinary system
+O,"(O00-O99) 	","Pregnancy, childbirth and the puerperium"
+P,"(P00-P96)	",Certain conditions originating in the perinatal period
+Q,"(Q00-Q99)	"," Congenital malformations, deformations and chromosomal abnormalities"
+R,"(R00-R99)	","Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified"
+S,"(S00-S99)	","Injury, poisoning and certain other consequences of external causes"
+T,"(T00-T98) 	","Injuries involving multiple body regions, Burns, poisoning"
+V,"(V01-V99)	",Transport accidents
+W,(W00-W99),"Falls, drowning, exposure to radiation and extreme ambient air temperature and presure"
+X,(X00-X84),"Exposure to fire and flames, intentional self-harm"
+Y,(Y00-Y98) ,"Assault, Sequelae of external causes of morbidity and mortality"
+Z,"(Z00-Z99)	",Factors influencing health status and contact with health services
+U,"(U00-U85)	",Provisional assignment of new diseases of uncertain etiology or emergency use; Resistance to antimicrobial and antineoplastic drugs
