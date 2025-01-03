@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map Visualization</title>
+    <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
+</head>
+<body>
+    <h1>Interactive Map of Total Deaths</h1>
+    
+    <!-- Dropdown for cause_group -->
+    <label for="cause_group">Cause Group:</label>
+    <select id="cause_group" onchange="updateMap()">
+        <option value="A">A</option>
+        <option value="B">B</option>
+        <option value="C">C</option>
+    </select>
+    
+    <!-- Dropdown for year -->
+    <label for="year">Year:</label>
+    <select id="year" onchange="updateMap()">
+        <option value="2020">2020</option>
+        <option value="2021">2021</option>
+    </select>
+    
+    <!-- Div for Plotly Map -->
+    <div id="map"></div>
+    
+    <script>
+        // Sample data: Replace this with your actual data source
+        const data = [
+            { ISO_Alpha3: "USA", Cause_Group: "A", Year: 2020, Total_Deaths: 1000 },
+            { ISO_Alpha3: "CAN", Cause_Group: "A", Year: 2020, Total_Deaths: 500 },
+            { ISO_Alpha3: "MEX", Cause_Group: "A", Year: 2020, Total_Deaths: 800 },
+            { ISO_Alpha3: "USA", Cause_Group: "B", Year: 2021, Total_Deaths: 1200 },
+            { ISO_Alpha3: "CAN", Cause_Group: "B", Year: 2021, Total_Deaths: 600 },
+            { ISO_Alpha3: "MEX", Cause_Group: "B", Year: 2021, Total_Deaths: 900 }
+        ];
+
+        // Function to filter data based on selected cause_group and year
+        function filterData(causeGroup, year) {
+            return data.filter(item => item.Cause_Group === causeGroup && item.Year == year);
+        }
+
+        // Function to update the map
+        function updateMap() {
+            // Get selected cause_group and year
+            const causeGroup = document.getElementById("cause_group").value;
+            const year = document.getElementById("year").value;
+            
+            // Filter data for the selected cause_group and year
+            const filteredData = filterData(causeGroup, year);
+            
+            // Extract data for Plotly
+            const locations = filteredData.map(item => item.ISO_Alpha3);
+            const sizes = filteredData.map(item => item.Total_Deaths);
+            const texts = filteredData.map(item => `${item.ISO_Alpha3}: ${item.Total_Deaths} deaths`);
+            
+            // Create the map
+            const trace = {
+                type: "scattergeo",
+                locations: locations,
+                marker: {
+                    size: sizes,
+                    sizemode: "area",
+                    sizeref: 2.0 * Math.max(sizes) / 50 ** 2, // Adjust size scaling
+                    color: sizes,
+                    colorscale: "Viridis",
+                    colorbar: { title: "Total Deaths" }
+                },
+                text: texts,
+                hoverinfo: "text"
+            };
+
+            const layout = {
+                title: `Total Deaths for Cause Group: ${causeGroup} in Year: ${year}`,
+                geo: {
+                    projection: { type: "natural earth" },
+                    showcoastlines: true,
+                    showcountries: true
+                }
+            };
+
+            // Render the map
+            Plotly.newPlot("map", [trace], layout);
+        }
+
+        // Initial map render
+        updateMap();
+    </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map Visualization</title>
+</head>
+<body>
+    <h1>Interactive Map of Total Deaths</h1>
+    
+    <form method="POST">
+        <label for="cause_group">Cause Group:</label>
+        <select name="cause_group" id="cause_group">
+            {% for group in unique_cause_groups %}
+                <option value="{{ group }}" {% if group == selected_cause_group %}selected{% endif %}>{{ group }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="year">Year:</label>
+        <select name="year" id="year">
+            {% for yr in unique_years %}
+                <option value="{{ yr }}" {% if yr == selected_year %}selected{% endif %}>{{ yr }}</option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit">Generate Map</button>
+    </form>
+    
+    <div>
+        {{ map_html | safe }}
+    </div>
+</body>
+</html>
