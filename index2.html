@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map Visualization</title>
+    <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
+</head>
+<body>
+    <h1>Interactive Map of Total Deaths</h1>
+    
+    <!-- Dropdown for cause_group -->
+    <label for="cause_group">Cause Group:</label>
+    <select id="cause_group" onchange="updateMap()"></select>
+    
+    <!-- Dropdown for year -->
+    <label for="year">Year:</label>
+    <select id="year" onchange="updateMap()"></select>
+    
+    <!-- Div for Plotly Map -->
+    <div id="map"></div>
+    
+    <script>
+        // Load CSV data and preprocess it
+        async function loadData() {
+            const response = await fetch('cleaned_part5_country_mortality_df.csv');
+            const csvText = await response.text();
+            
+            // Parse CSV into data array
+            const rows = csvText.split('\n').slice(1); // Remove header
+            const data = rows.map(row => {
+                const [Country_code, Country_name, ISO_Alpha3, Year, Cause, Sex, Total_deaths] = row.split(',');
+                return {
+                    ISO_Alpha3: ISO_Alpha3,
+                    Cause: Cause,
+                    Cause_Group: Cause.charAt(0), // Extract first character
+                    Year: parseFloat(Year),
+                    Total_Deaths: parseFloat(Total_deaths)
+                };
+            }).filter(row => row.ISO_Alpha3 && !isNaN(row.Total_Deaths)); // Clean invalid rows
+
+            return data;
+        }
+
+        // Initialize dropdowns and map
+        async function initialize() {
+            const data = await loadData();
+
+            // Extract unique cause groups and years
+            const uniqueCauseGroups = [new Set(data.map(row => row.Cause_Group))].sort();
+            const uniqueYears = [new Set(data.map(row => row.Year))].sort((a, b) => a - b);
+
+            // Populate dropdowns
+            const causeGroupDropdown = document.getElementById('cause_group');
+            const yearDropdown = document.getElementById('year');
+            uniqueCauseGroups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group;
+                option.textContent = group;
+                causeGroupDropdown.appendChild(option);
+            });
+            uniqueYears.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearDropdown.appendChild(option);
+            });
+
+            // Initial map render
+            updateMap();
+        }
+
+        // Update the map based on dropdown selections
+        async function updateMap() {
+            const data = await loadData();
+
+            // Get selected values
+            const causeGroup = document.getElementById('cause_group').value;
+            const year = parseFloat(document.getElementById('year').value);
+
+            // Filter data based on selections
+            const filteredData = data.filter(row => row.Cause_Group === causeGroup && row.Year === year);
+
+            // Extract data for Plotly
+            const locations = filteredData.map(row => row.ISO_Alpha3);
+            const sizes = filteredData.map(row => row.Total_Deaths);
+            const texts = filteredData.map(row => `${row.ISO_Alpha3}: ${row.Total_Deaths} deaths`);
+
+            // Create the map
+            const trace = {
+                type: 'scattergeo',
+                locations: locations,
+                marker: {
+                    size: sizes,
+                    sizemode: 'area',
+                    sizeref: 2.0 * Math.max(sizes) / 50 ** 2, // Adjust size scaling
+                    color: sizes,
+                    colorscale: 'Viridis',
+                    colorbar: { title: 'Total Deaths' }
+                },
+                text: texts,
+                hoverinfo: 'text'
+            };
+
+            const layout = {
+                title: `Total Deaths for Cause Group: ${causeGroup} in Year: ${year}`,
+                geo: {
+                    projection: { type: 'natural earth' },
+                    showcoastlines: true,
+                    showcountries: true
+                }
+            };
+
+            // Render the map
+            Plotly.newPlot('map', [trace], layout);
+        }
+
+        // Initialize the app
+        initialize();
+    </script>
+</body>
+</html>
