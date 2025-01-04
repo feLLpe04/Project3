@@ -22,14 +22,12 @@
     
     <script>
         // GitHub raw URL for the CSV file
-        const csvUrl = 'https://raw.githubusercontent.com/SunilduthBaichoo/Project3/refs/heads/main/cleaneddata/cleaned_part5_country_mortality_df.csv';
+        const csvUrl = 'https://raw.githubusercontent.com/SunilduthBaichoo/Project3/main/cleaneddata/cleaned_part5_country_mortality_df.csv';
 
         // Load CSV data and preprocess it
         async function loadData() {
             const response = await fetch(csvUrl);
             const csvText = await response.text();
-            //console.log(csvText);
-
             
             // Parse CSV into data array
             const rows = csvText.trim().split('\n').slice(1); // Remove header
@@ -43,33 +41,33 @@
                     Total_Deaths: parseFloat(Total_deaths)
                 };
             }).filter(row => row.ISO_Alpha3 && !isNaN(row.Total_Deaths)); // Clean invalid rows
-            //console.log(data);
+
             return data;
         }
 
         // Initialize dropdowns and map
         async function initialize() {
             const data = await loadData();
-            //console.log(data);
 
             // Extract unique cause groups and years
             const uniqueCauseGroups = [...new Set(data.map(row => row.Cause_Group))].sort();
             const uniqueYears = [...new Set(data.map(row => row.Year))].sort((a, b) => a - b);
-            console.log(uniqueCauseGroups);
-            console.log(uniqueYears);
+
             // Populate dropdowns
             const causeGroupDropdown = document.getElementById('cause_group');
             const yearDropdown = document.getElementById('year');
+
             uniqueCauseGroups.forEach(group => {
                 const option = document.createElement('option');
                 option.value = group;
-                option.textContent = group;
+                option.textContent = group; // Use group as the text content
                 causeGroupDropdown.appendChild(option);
             });
+
             uniqueYears.forEach(year => {
                 const option = document.createElement('option');
                 option.value = year;
-                option.textContent = year;
+                option.textContent = year; // Use year as the text content
                 yearDropdown.appendChild(option);
             });
 
@@ -93,6 +91,10 @@
             const sizes = filteredData.map(row => row.Total_Deaths);
             const texts = filteredData.map(row => `${row.ISO_Alpha3}: ${row.Total_Deaths} deaths`);
 
+            // Calculate sizeref to scale bubbles properly
+            const maxSize = Math.max(...sizes);
+            const sizeref = 2.0 * maxSize / (50 ** 2); // Adjust the divisor for scaling
+
             // Create the map
             const trace = {
                 type: 'scattergeo',
@@ -100,7 +102,7 @@
                 marker: {
                     size: sizes,
                     sizemode: 'area',
-                    sizeref: 2.0 * Math.max(...sizes) / 50 ** 2, // Adjust size scaling
+                    sizeref: sizeref, // Proportional scaling
                     color: sizes,
                     colorscale: 'Viridis',
                     colorbar: { title: 'Total Deaths' }
