@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Total Deaths Map with Plotly</title>
+  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    #map {
+      width: 90%; /* Increased width to take up more space */
+      margin: 0 auto; /* Center the map on the page */
+    }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    h2 {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Total Deaths Map</h2>
+  <div>
+    <label for="causeGroup">Cause Group:</label>
+    <select id="causeGroup">
+      <!-- Options will be dynamically added -->
+    </select>
+
+    <label for="yearRange">Year:</label>
+    <input type="range" id="yearRange" min="2013" max="2022" step="1" value="2013">
+    <span id="yearLabel">2013</span>
+  </div>
+  <div id="map"></div>
+
+  <script>
+    const csvUrl = 'https://raw.githubusercontent.com/SunilduthBaichoo/Project3/refs/heads/main/cleaneddata/aggregated_mortality_2013_2022_df.csv';
+
+    // Load CSV data
+    d3.csv(csvUrl).then(data => {
+      // Parse the data
+      data.forEach(d => {
+        d.Year = +d.Year;
+        d.Total_deaths = +d.Total_deaths;
+      });
+
+      // Extract unique cause groups and initialize the dropdown
+      const causeGroups = [...new Set(data.map(d => d.Cause_Group))];
+      const causeGroupSelect = document.getElementById('causeGroup');
+      causeGroups.forEach(group => {
+        const option = document.createElement('option');
+        option.value = group;
+        option.textContent = group;
+        causeGroupSelect.appendChild(option);
+      });
+
+      // Function to update the Plotly map
+      function updateMap() {
+        const selectedCauseGroup = causeGroupSelect.value;
+        const selectedYear = parseInt(document.getElementById('yearRange').value);
+
+        // Filter data by selected cause group and year
+        const filteredData = data.filter(d => d.Cause_Group === selectedCauseGroup && d.Year === selectedYear);
+
+        // Prepare data for Plotly
+        const plotData = {
+          type: 'choropleth',
+          locations: filteredData.map(d => d.ISO_Alpha3), // ISO Alpha-3 country codes
+          z: filteredData.map(d => d.Total_deaths), // Deaths count
+          text: filteredData.map(d => d.Country_name), // Hover text
+          colorscale: 'RdPu', // Red to Purple color scale
+          colorbar: { title: 'Total Deaths' }
+        };
+
+        const layout = {
+          title: `Total Deaths in ${selectedYear} for Cause Group: ${selectedCauseGroup}`,
+          geo: {
+            projection: {
+              type: 'natural earth'
+            }
+          },
+          width: 1200, // Increased width of the map
+          height: 700 // Increased height of the map
+        };
+
+        // Render the map
+        Plotly.newPlot('map', [plotData], layout);
+      }
+
+      // Event listeners for dropdown and slider
+      causeGroupSelect.addEventListener('change', updateMap);
+      document.getElementById('yearRange').addEventListener('input', function () {
+        document.getElementById('yearLabel').textContent = this.value;
+        updateMap();
+      });
+
+      // Initial map rendering
+      updateMap();
+    }).catch(error => {
+      console.error('Error loading CSV:', error);
+    });
+  </script>
+</body>
+</html>

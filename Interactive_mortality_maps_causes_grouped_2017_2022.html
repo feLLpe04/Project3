@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Map Visualization</title>
     <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
+    <style>
+        #map {
+          width: 90%;
+          margin: 0 auto;
+        }
+        body {
+          font-family: Arial, sans-serif;
+          text-align: center;
+        }
+        h2 {
+          margin-top: 20px;
+        }
+      </style>
 </head>
 <body>
     <h1>Interactive Map of Total Deaths</h1>
@@ -140,6 +153,8 @@
                     showcoastlines: true,
                     showcountries: true
                 },
+                width: 1200,
+                height: 700,
                 showlegend: true
             };
 
