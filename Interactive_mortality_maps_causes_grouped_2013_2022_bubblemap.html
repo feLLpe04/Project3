@@ -7,24 +7,24 @@
   <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
-    #map {
-      width: 90%;
-      margin: 0 auto;
-    }
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-    h2 {
-      margin-top: 20px;
-    }
-    .legend {
-      margin-top: 10px;
-    }
+      #map {
+        width: 90%;
+        margin: 0 auto;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+      h2 {
+        margin-top: 20px;
+      }
+      .legend {
+        margin-top: 10px;
+      }
   </style>
 </head>
 <body>
-  <h2>Total Deaths Bubble Map</h2>
+  <h2>Interactive Bubble Map of Total Deaths </h2>
   <div>
     <label for="causeGroup">Cause Group:</label>
     <select id="causeGroup">
@@ -38,7 +38,7 @@
   <div id="map"></div>
 
   <script>
-    //const csvUrl = 'https://raw.githubusercontent.com/SunilduthBaichoo/Project3/refs/heads/main/cleaneddata/cleaned_country_mortality_2013_2022_df.csv';
+    // GitHub raw URL for the CSV file
     const csvUrl = 'https://raw.githubusercontent.com/SunilduthBaichoo/Project3/refs/heads/main/cleaneddata/aggregated_mortality_2013_2022_df.csv';
 
     // Load CSV data
@@ -95,6 +95,8 @@
             projection: {
               type: 'natural earth'
             },
+            showcoastlines: true,
+            showcountries: true,
             showland: true,
             landcolor: 'rgb(243, 243, 243)',
             countrycolor: 'rgb(204, 204, 204)',
