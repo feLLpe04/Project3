@@ -22,21 +22,20 @@
     
     <script>
         // GitHub raw URL for the CSV file
-        const csvUrl = 'https://raw.githubusercontent.com/SunilduthBaichoo/Project3/main/cleaneddata/cleaned_part5_country_mortality_df.csv';
+        const csvUrl = 'https://raw.githubusercontent.com/SunilduthBaichoo/Project3/refs/heads/main/cleaneddata/cleaned_country_mortality_2013_2022_df.csv';
 
         // Load CSV data and preprocess it
         async function loadData() {
             const response = await fetch(csvUrl);
             const csvText = await response.text();
-            
+            console.log(csvText);
             // Parse CSV into data array
             const rows = csvText.trim().split('\n').slice(1); // Remove header
             const data = rows.map(row => {
-                const [Country_code, Country_name, ISO_Alpha3, Year, Cause, Sex, Total_deaths] = row.split(',');
+                const [Country_code, Country_name, ISO_Alpha3, Year, Cause_Group, Sex, Total_deaths] = row.split(',');
                 return {
                     ISO_Alpha3: ISO_Alpha3,
-                    Cause: Cause,
-                    Cause_Group: Cause.charAt(0), // Extract first character
+                    Cause_Group: Cause_Group, 
                     Year: parseFloat(Year),
                     Total_Deaths: parseFloat(Total_deaths)
                 };
@@ -107,23 +106,6 @@
             // Aggregate data
             const aggregatedData = aggregateData(data, causeGroup, year);
 
-            // Extract unique countries and assign each a color index
-            const uniqueCountries = [...new Set(aggregatedData.map(row => row.ISO_Alpha3))];
-            const colorMapping = uniqueCountries.reduce((map, country, index) => {
-                map[country] = index;
-                return map;
-            }, {});
-
-            // Extract data for Plotly
-            const locations = aggregatedData.map(row => row.ISO_Alpha3);
-            const sizes = aggregatedData.map(row => row.Total_Deaths);
-            const colors = aggregatedData.map(row => colorMapping[row.ISO_Alpha3]); // Map to numerical color index
-            const texts = aggregatedData.map(row => `${row.ISO_Alpha3}: ${row.Total_Deaths} deaths`);
-
-            // Calculate sizeref to scale bubbles properly
-            const maxSize = Math.max(...sizes);
-            const sizeref = 2.0 * maxSize / (50 ** 2); // Adjust the divisor for scaling
-
             // Define a Red-to-Violet custom colorscale
             const redToVioletColorscale = [
                 [0, 'red'],        // Start at red
@@ -133,33 +115,35 @@
                 [1, 'violet']      // End at violet
             ];
 
-            // Create the map
-            const trace = {
+            // Create a separate trace for each country
+            const traces = aggregatedData.map((row, index) => ({
                 type: 'scattergeo',
-                locations: locations,
+                locations: [row.ISO_Alpha3],
                 marker: {
-                    size: sizes,
+                    size: [row.Total_Deaths],
                     sizemode: 'area',
-                    sizeref: sizeref, // Proportional scaling
-                    color: colors, // Assign unique numerical value for each country
-                    colorscale: redToVioletColorscale, // Use Red-to-Violet custom colorscale
-                    colorbar: { title: 'Country Index' }
+                    sizeref: 2.0 * Math.max(...aggregatedData.map(r => r.Total_Deaths)) / (50 ** 2), // Proportional scaling
+                    color: index / (aggregatedData.length - 1), // Normalize index to 0-1 range
+                    colorscale: redToVioletColorscale,
                 },
-                text: texts,
-                hoverinfo: 'text'
-            };
+                name: `${row.ISO_Alpha3}: ${row.Total_Deaths} deaths`, // Legend entry
+                hoverinfo: 'text',
+                text: `${row.ISO_Alpha3}: ${row.Total_Deaths} deaths`
+            }));
 
+            // Layout configuration
             const layout = {
                 title: `Total Deaths for Cause Group: ${causeGroup} in Year: ${year}`,
                 geo: {
                     projection: { type: 'natural earth' },
                     showcoastlines: true,
                     showcountries: true
-                }
+                },
+                showlegend: true
             };
 
             // Render the map
-            Plotly.newPlot('map', [trace], layout);
+            Plotly.newPlot('map', traces, layout);
         }
 
         // Initialize the app
