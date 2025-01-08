@@ -1,7 +1,7 @@
 # Project3
 Visualization of most deadly diseases
 
-
+.
 An overview of the project and its purpose
 
 Instructions on how to use and interact with the project
