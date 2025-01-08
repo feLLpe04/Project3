@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map Visualization</title>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <style>
+        #map {
+            width: 90%;
+            margin: 0 auto;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        h2 {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Map of Total Deaths</h1>
+
+    <!-- Dropdown for cause_group -->
+    <label for="cause_group">Cause Group:</label>
+    <select id="cause_group" onchange="updateMap()"></select>
+
+    <!-- Dropdown for year -->
+    <label for="year">Year:</label>
+    <select id="year" onchange="updateMap()"></select>
+
+    <!-- Div for Plotly Map -->
+    <div id="map"></div>
+
+    <script>
+        const apiUrl = 'http://127.0.0.1:5000/api/mortality'; // Flask API endpoint
+        let cachedData = null;
+
+        // Fetch data from the Flask API
+        async function loadData(causeGroup = null, year = null) {
+            let url = apiUrl;
+
+            // Append query parameters if provided
+            if (causeGroup || year) {
+                const params = new URLSearchParams();
+                if (causeGroup) params.append('cause_group', causeGroup);
+                if (year) params.append('year', year);
+                url += `?${params.toString()}`;
+            }
+
+            const response = await fetch(url);
+            if (!response.ok) {
+                console.error('Error fetching data:', response.statusText);
+                return [];
+            }
+            return await response.json(); // Return the parsed JSON data
+        }
+
+        // Group and aggregate data by Cause_Group and country
+        function aggregateData(data) {
+            // Aggregate total deaths by ISO_Alpha3
+            const aggregatedData = {};
+            data.forEach(row => {
+                if (!aggregatedData[row.ISO_Alpha3]) {
+                    aggregatedData[row.ISO_Alpha3] = 0;
+                }
+                aggregatedData[row.ISO_Alpha3] += row.Total_deaths;
+            });
+
+            // Convert aggregated data to array format for Plotly
+            return Object.entries(aggregatedData).map(([ISO_Alpha3, Total_Deaths]) => ({
+                ISO_Alpha3,
+                Total_Deaths
+            }));
+        }
+
+        // Initialize dropdowns and map
+        async function initialize() {
+            const data = await loadData();
+
+            // Extract unique cause groups and years
+            const uniqueCauseGroups = [...new Set(data.map(row => row.Cause.charAt(0)))].sort();
+            const uniqueYears = [...new Set(data.map(row => row.Year))].sort((a, b) => a - b);
+
+            // Populate dropdowns
+            const causeGroupDropdown = document.getElementById('cause_group');
+            const yearDropdown = document.getElementById('year');
+
+            uniqueCauseGroups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group;
+                option.textContent = group; // Use group as the text content
+                causeGroupDropdown.appendChild(option);
+            });
+
+            uniqueYears.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year; // Use year as the text content
+                yearDropdown.appendChild(option);
+            });
+
+            // Initial map render
+            updateMap();
+        }
+
+        // Update the map based on dropdown selections
+        async function updateMap() {
+            // Get selected values
+            const causeGroup = document.getElementById('cause_group').value;
+            const year = parseInt(document.getElementById('year').value, 10);
+
+            // Fetch filtered data from the API
+            const data = await loadData(causeGroup, year);
+
+            // Aggregate data
+            const aggregatedData = aggregateData(data);
+
+            // Define a Plotly-supported colorscale
+            const colorscale = 'Viridis';
+
+            // Prepare the single trace for all countries
+            const trace = {
+                type: 'scattergeo',
+                locations: aggregatedData.map(row => row.ISO_Alpha3), // Country codes
+                marker: {
+                    size: aggregatedData.map(row => Math.sqrt(row.Total_Deaths) * 0.5), // Bubble size proportional to deaths
+                    sizemode: 'area',
+                    color: aggregatedData.map(row => row.Total_Deaths),
+                    colorscale: colorscale,
+                    colorbar: { title: 'Total Deaths' }
+                },
+                text: aggregatedData.map(row => `${row.ISO_Alpha3}: ${row.Total_Deaths} deaths`), // Hover text
+                hoverinfo: 'text',
+                name: 'Countries'
+            };
+
+            const layout = {
+                title: `Total Deaths for Cause Group: ${causeGroup} in Year: ${year}`,
+                geo: {
+                    projection: { type: 'natural earth' },
+                    showcoastlines: true,
+                    showcountries: true
+                },
+                width: 1200,
+                height: 700
+            };
+
+            // Render the map
+            Plotly.newPlot('map', [trace], layout);
+        }
+
+        // Initialize the app
+        initialize();
+    </script>
+</body>
+</html>
