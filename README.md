@@ -1,6 +1,7 @@
 # Project3 Title
 "Global Mortality Trends: Analyzing Leading Causes, Gender-Based Impacts, and Geographical Patterns Over the Last Decade"
 
+A powerpoint presentation of the project can be found here : https://docs.google.com/presentation/d/1qnH1wmWCbdr6HocKliGCOUD_IzJY2D7DmEgDXAFxV3w/edit#slide=id.gd251bb473_0_681
 
 # An overview of the project and its purpose
 It’s a Data Visualization Track  project where we would like to get insights from the data loaded to create data output where we can recommend tourists not to go tp places on the globe due to infectious diseases hotspots, at the same time this data can be interpreted by law authorities to establish contingency plans where they can combat these diseases.  It will help private and hopefully local governments to enhance current public sanitation diseases in maybe one country but different areas. 
